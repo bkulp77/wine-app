@@ -33,8 +33,11 @@ async function loadInventory() {
       throw new Error(`[${error.code || 'API Error'}] ${error.message}`);
     }
 
-    if (data && data.length > 0) {
-      inventoryData = [...data]; // Clear and clone the new raw dataset records
+if (data && data.length > 0) { 
+  // Grabs the data, but completely filters out any row where the quantity is 0 or less
+  inventoryData = JSON.parse(JSON.stringify(data)).filter(row => {
+    return (parseInt(row.quantity) || 0) > 0;
+  }); 
       
       // Sort data locally by Winery Name, then Wine Name
       inventoryData.sort((rowA, rowB) => {
