@@ -12,15 +12,14 @@ const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 const tableBody = document.getElementById('table-body'); 
 const searchBox = document.getElementById('search-box'); 
-let inventoryData = []; 
+let inventoryData = [];
 
-// Load inventory records straight from your live remote table 
-// Load inventory records straight from your live remote table
+// Clean, library-native data fetch function
 async function loadInventory() {
   try {
     console.log("Attempting secure connection to Supabase...");
     
-    // Kept 100% clean and standard to avoid any connection failures or library parsing errors
+    // We execute a completely clean standard request to prevent initialization failures
     const { data, error } = await supabase
       .from('inventory.csv')
       .select('*');
@@ -30,9 +29,9 @@ async function loadInventory() {
       throw new Error(`[${error.code || 'API Error'}] ${error.message}`);
     }
 
-    // Explicitly verify data structure and clear old cache arrays locally
     if (data && data.length > 0) {
-      inventoryData = [...data]; // Force a fresh array clone to overwrite local browser states
+      // Force clone the array to overwrite localized browser layout states
+      inventoryData = [...data]; 
       
       // Sort data locally by Winery Name, then Wine Name
       inventoryData.sort((rowA, rowB) => {
@@ -59,125 +58,96 @@ async function loadInventory() {
   }
 }
 
+function renderTable(rows) {
+  tableBody.innerHTML = '';
+  if (!rows || rows.length === 0) {
+    tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:20px; color:#666;">Your database table is connected but empty.</td></tr>`;
+    return;
+  }
+  rows.forEach((row) => {
+    try {
+      const tr = document.createElement('tr');
+      const id = row.id;
+      const winery = row.winery || 'N/A';
+      const state = row.state || 'N/A';
+      const wineName = row.wine_name || 'N/A';
+      const vintage = row.vintage || 'N/A';
+      const type = row.type || 'N/A';
+      let quantity = parseInt(row.quantity) || 0;
+      const binLocation = row.bin_location || 'N/A';
+      const imagePath = row.image ? String(row.image).trim() : '';
+      const website = row.website || 'N/A';
+      const lowStockClass = quantity <= 1 ? '' : 'display: none;';
+      const imageHtml = imagePath ? `<img src="${imagePath}" class="wine-pic" alt="${wineName}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : '';
+      const fallbackHtml = `<div class="wine-pic" style="${imagePath ? 'display:none;' : 'display:flex;'}">🍷</div>`;
+      
+      tr.innerHTML = `
+        <td><div class="img-cell-wrapper">${imageHtml}${fallbackHtml}</div></td>
+        <td><strong>${winery}</strong></td>
+        <td>${state}</td>
+        <td>${wineName}</td>
+        <td>${vintage}</td>
+        <td>${type}</td>
+        <td>
+          <div class="qty-controls">
+            <button class="btn-qty btn-minus">−</button>
+            <span class="qty-val">${quantity}</span>
+            <button class="btn-qty btn-plus">+</button>
+            <span class="low-stock" style="${lowStockClass}">Low</span>
+          </div>
+        </td>
+        <td><code>${binLocation}</code></td>
+        <td><a href="https://${website}" target="_blank"><code>${website}</code></a></td>
+      `;
 
-function renderTable(rows) { 
-    tableBody.innerHTML = ''; 
-    if (!rows || rows.length === 0) { 
-        tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:20px; color:#666;">Your database table is connected but empty.</td></tr>`; 
-        return; 
-    } 
-    rows.forEach((row) => { 
-        try { 
-            const tr = document.createElement('tr'); 
-            const id = row.id; 
-            const winery = row.winery || 'N/A'; 
-            const state = row.state || 'N/A'; 
-            const wineName = row.wine_name || 'N/A'; 
-            const vintage = row.vintage || 'N/A'; 
-            const type = row.type || 'N/A'; 
-            let quantity = parseInt(row.quantity) || 0; 
-            const binLocation = row.bin_location || 'N/A'; 
-            const imagePath = row.image ? String(row.image).trim() : ''; 
-            const website = row.website || 'N/A'; 
-            const lowStockClass = quantity <= 1 ? '' : 'display: none;'; 
-            const imageHtml = imagePath ? `<img src="${imagePath}" class="wine-pic" alt="${wineName}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''; 
-            const fallbackHtml = `<div class="wine-pic" style="${imagePath ? 'display:none;' : 'display:flex;'}">🍷</div>`; 
+      const qtyValEl = tr.querySelector('.qty-val');
+      const lowStockEl = tr.querySelector('.low-stock');
 
-            tr.innerHTML = ` 
-                <td> 
-                    <div class="img-cell-wrapper"> 
-                        ${imageHtml} 
-                        ${fallbackHtml} 
-                    </div> 
-                </td> 
-                <td><strong>${winery}</strong></td> 
-                <td>${state}</td> 
-                <td>${wineName}</td> 
-                <td>${vintage}</td> 
-                <td>${type}</td> 
-                <td> 
-                    <div class="qty-controls"> 
-                        <button class="btn-qty btn-minus">−</button> 
-                        <span class="qty-val">${quantity}</span> 
-                        <button class="btn-qty btn-plus">+</button> 
-                        <span class="low-stock" style="${lowStockClass}">Low</span> 
-                    </div> 
-                </td> 
-                <td><code>${binLocation}</code></td> 
-                <td><a href="https://${website}" target="_blank"><code>${website}</code></a></td> 
-            `; 
-
-            const qtyValEl = tr.querySelector('.qty-val'); 
-            const lowStockEl = tr.querySelector('.low-stock'); 
-
-           // Corrected button event listeners
-tr.querySelector('.btn-minus').addEventListener('click', async () => {
-  if (quantity > 0) {
-    quantity--;
-    
-    // Explicitly send the current row properties alongside the ID target
-    const { error } = await supabase
-      .from('inventory.csv')
-      .update({ 
-        id: id, 
-        quantity: quantity,
-        type: row.type // Keeps type synced with whatever is currently stored on the object
+      tr.querySelector('.btn-minus').addEventListener('click', async () => {
+        if (quantity > 0) {
+          quantity--;
+          const { error } = await supabase.from('inventory.csv').update({ id: id, quantity: quantity });
+          if (!error) {
+            row.quantity = quantity;
+            qtyValEl.textContent = quantity;
+            lowStockEl.style.display = quantity <= 1 ? 'inline' : 'none';
+          } else {
+            alert("Failed to update: " + error.message);
+          }
+        }
       });
 
-    if (!error) {
-      row.quantity = quantity;
-      qtyValEl.textContent = quantity;
-      lowStockEl.style.display = quantity <= 1 ? 'inline' : 'none';
-    } else {
-      alert("Failed to update: " + error.message);
+      tr.querySelector('.btn-plus').addEventListener('click', async () => {
+        quantity++;
+        const { error } = await supabase.from('inventory.csv').update({ id: id, quantity: quantity });
+        if (!error) {
+          row.quantity = quantity;
+          qtyValEl.textContent = quantity;
+          lowStockEl.style.display = quantity <= 1 ? 'inline' : 'none';
+        } else {
+          alert("Failed to update: " + error.message);
+        }
+      });
+
+      tableBody.appendChild(tr);
+    } catch (rowError) {
+      console.error("Error rendering a row item:", rowError, row);
     }
-  }
+  });
+}
+
+// Live lookup filter search input loop
+searchBox.addEventListener('input', function(e) {
+  const searchFilter = e.target.value.toLowerCase();
+  const filteredRows = inventoryData.filter(row => {
+    const winery = String(row.winery || '').toLowerCase();
+    const wineName = String(row.wine_name || '').toLowerCase();
+    const binLocation = String(row.bin_location || '').toLowerCase();
+    const type = String(row.type || '').toLowerCase();
+    return winery.includes(searchFilter) || wineName.includes(searchFilter) || type.includes(searchFilter) || binLocation.includes(searchFilter);
+  });
+  renderTable(filteredRows);
 });
 
-tr.querySelector('.btn-plus').addEventListener('click', async () => {
-  quantity++;
-  
-  // Explicitly send the current row properties alongside the ID target
-  const { error } = await supabase
-    .from('inventory.csv')
-    .update({ 
-      id: id, 
-      quantity: quantity,
-      type: row.type // Keeps type synced with whatever is currently stored on the object
-    });
-
-  if (!error) {
-    row.quantity = quantity;
-    qtyValEl.textContent = quantity;
-    lowStockEl.style.display = quantity <= 1 ? 'inline' : 'none';
-  } else {
-    alert("Failed to update: " + error.message);
-  }
-});
-
-            tableBody.appendChild(tr); 
-        } catch (rowError) { 
-            console.error("Error rendering a row item:", rowError, row); 
-        } 
-    }); 
-} 
-
-// Live real-time text input search filtering loop
-searchBox.addEventListener('input', function(e) { 
-    const searchFilter = e.target.value.toLowerCase(); 
-    const filteredRows = inventoryData.filter(row => { 
-        const winery = String(row.winery || '').toLowerCase(); 
-        const wineName = String(row.wine_name || '').toLowerCase(); 
-        const binLocation = String(row.bin_location || '').toLowerCase(); 
-        const type = String(row.type || '').toLowerCase(); 
-        
-        return winery.includes(searchFilter) || 
-               wineName.includes(searchFilter) || 
-               type.includes(searchFilter) || 
-               binLocation.includes(searchFilter); 
-    }); 
-    renderTable(filteredRows); 
-}); 
-
-// Automatically runs baseline query operation on layout compilation
+// Run layout initialization
 loadInventory();
