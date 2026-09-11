@@ -1,7 +1,7 @@
 /* =====================================================================
    PRE-PACKAGED OFFLINE DATABASE TOOLS (DO NOT EDIT THIS UPPER PORTION)
    ===================================================================== */
-(function(g,f){typeof exports==='object'&&typeof module!=='undefined'?f(exports):typeof define==='function'&&define.amd?define(['exports'],f):(g=typeof globalThis!=='undefined'?globalThis:g||self,f(g.supabase={}))})(this,(function(exports){'use strict';var __defProp=Object.defineProperty;var __getOwnPropSymbols=Object.getOwnPropertySymbols;var __hasOwnProp=Object.prototype.hasOwnProperty;var __propIsEnum=Object.prototype.propertyIsEnumerable;var __defNormalProp=(obj,key,value)=>key in obj?__defProp(obj,key,{enumerable:true,configurable:true,writable:true,value}):obj[key]=value;var __spreadValues=(a,b)=>{for(var prop in b||(b={}))if(__hasOwnProp.call(b,prop))__defNormalProp(a,prop,b[prop]);if(__getOwnPropSymbols)for(var prop of __getOwnPropSymbols(b)){if(__propIsEnum.call(b,prop))__defNormalProp(a,prop,b[prop]);}return a;};class SupabaseClient{constructor(supabaseUrl,supabaseKey,options){this.supabaseUrl=supabaseUrl;this.supabaseKey=supabaseKey;const settings=__spreadValues({auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}},options);this.auth=null;this.realtime=null;}from(table){const url=`${this.supabaseUrl}/rest/v1/${table}`;return{select:(columns='*')=>this._request('GET',url,null,columns),insert:(values)=>this._request('POST',url,values),update:(values)=>this._request('PATCH',url,values),delete:()=>this._request('DELETE',url,null)};}_request(method,url,body=null,columns=null){let targetUrl=url;if(columns)targetUrl+=`?select=${encodeURIComponent(columns)}`;if(method==='PATCH'||method==='DELETE'){const idSearch=body&&body.id?`id=eq.${body.id}`:'';if(idSearch)targetUrl+=`?${idSearch}`;}const headers={'apikey':this.supabaseKey,'Authorization':`Bearer ${this.supabaseKey}`,'Content-Type':'application/json','Prefer':'return=representation'};if(method==='PATCH'&&body){delete body.id;}const fetchOptions={method,headers};if(body&&method!=='GET')fetchOptions.body=JSON.stringify(body);return fetch(targetUrl,fetchOptions).then(res=>{if(!res.ok)return res.json().then(err=>({data:null,error:err}));if(res.status===204)return{data:[],error:null};return res.json().then(data=>({data,error:null}));}).catch(err=>({data:null,error:{message:err.message}}));}}function createClient(supabaseUrl,supabaseKey,options){return new SupabaseClient(supabaseUrl,supabaseKey,options)}exports.createClient=createClient;Object.defineProperty(exports,'__esModule',{value:true});})); 
+(function(g,f){typeof exports==='object'&&typeof module!=='undefined'?f(exports):typeof define==='function'&&define.amd?define(['exports'],f):(g=typeof globalThis!=='undefined'?globalThis:g||self,f(g.supabase={}))})(this,(function(exports){'use strict';var __defProp=Object.defineProperty;var __getOwnPropSymbols=Object.getOwnPropertySymbols;var __hasOwnProp=Object.prototype.hasOwnProperty;var __propIsEnum=Object.prototype.propertyIsEnumerable;var __defNormalProp=(obj,key,value)=>key in obj?__defProp(obj,key,{enumerable:true,configurable:true,writable:true,value}):obj[key]=value;var __spreadValues=(a,b)=>{for(var prop in b||(b={}))if(__hasOwnProp.call(b,prop))__defNormalProp(a,prop,b[prop]);if(__getOwnPropSymbols)for(var prop of __getOwnPropSymbols(b)){if(__propIsEnum.call(b,prop))__defNormalProp(a,prop,b[prop]);}return a;};class SupabaseClient{constructor(supabaseUrl,supabaseKey,options){this.supabaseUrl=supabaseUrl;this.supabaseKey=supabaseKey;const settings=__spreadValues({auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}},options);this.auth=null;this.realtime=null;}from(table){const url=`${this.supabaseUrl}/rest/v1/${table}`;return{select:(columns='*')=>this._request('GET',url,null,columns),insert:(values)=>this._request('POST',url,values),update:(values)=>this._request('PATCH',url,values),delete:()=>this._request('DELETE',url,null)};}_request(method,url,body=null,columns=null){let targetUrl=url;if(columns)targetUrl+=`?select=${encodeURIComponent(columns)}}`;if(method==='PATCH'||method==='DELETE'){const idSearch=body&&body.id?`id=eq.${body.id}`:'';if(idSearch)targetUrl+=`?${idSearch}`;}const headers={'apikey':this.supabaseKey,'Authorization':`Bearer ${this.supabaseKey}`,'Content-Type':'application/json','Prefer':'return=representation'};if(method==='PATCH'&&body){delete body.id;}const fetchOptions={method,headers};if(body&&method!=='GET')fetchOptions.body=JSON.stringify(body);return fetch(targetUrl,fetchOptions).then(res=>{if(!res.ok)return res.json().then(err=>({data:null,error:err}));if(res.status===204)return{data:[],error:null};return res.json().then(data=>({data,error:null}));}).catch(err=>({data:null,error:{message:err.message}}));}}function createClient(supabaseUrl,supabaseKey,options){return new SupabaseClient(supabaseUrl,supabaseKey,options)}exports.createClient=createClient;Object.defineProperty(exports,'__esModule',{value:true});})); 
 
 /* =====================================================================
    YOUR CUSTOM INVENTORY CODE (CONFIGURED TO USE OFFLINE TOOLS)
@@ -19,10 +19,10 @@ async function loadInventory() {
   try {
     console.log("Attempting secure connection to Supabase...");
     
-    // We execute a completely clean standard request to prevent initialization failures
+    // Kept completely standard so your library runs smoothly
     const { data, error } = await supabase
-      .from('inventory.csv')
-      .select('*');
+  .from('inventory.csv')
+  .select('*');
 
     if (error) {
       console.error("Supabase Error Details:", error);
@@ -30,7 +30,6 @@ async function loadInventory() {
     }
 
     if (data && data.length > 0) {
-      // Force clone the array to overwrite localized browser layout states
       inventoryData = [...data]; 
       
       // Sort data locally by Winery Name, then Wine Name
