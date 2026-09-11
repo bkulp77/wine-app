@@ -15,42 +15,50 @@ const searchBox = document.getElementById('search-box');
 let inventoryData = []; 
 
 // Load inventory records straight from your live remote table 
-async function loadInventory() { 
-    try { 
-        console.log("Attempting secure connection to Supabase..."); 
-        const { data, error } = await supabase
-  .from('inventory.csv')
-  .select('*', { 
-    headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' } 
-  });
-        if (error) { 
-            console.error("Supabase Error Details:", error); 
-            throw new Error(`[${error.code || 'API Error'}] ${error.message}`); 
-        } 
+// Load inventory records straight from your live remote table
+async function loadInventory() {
+  try {
+    console.log("Attempting secure connection to Supabase...");
+    
+    // Kept 100% clean and standard to avoid any connection failures or library parsing errors
+    const { data, error } = await supabase
+      .from('inventory.csv')
+      .select('*');
 
-        // Sort data locally by Winery Name, then Wine Name (with string conversion safety for numeric codes like '250') 
-        if (data && data.length > 0) { 
-            data.sort((rowA, rowB) => { 
-                const wineryA = String(rowA.winery || '').trim().toLowerCase(); 
-                const wineryB = String(rowB.winery || '').trim().toLowerCase(); 
-                if (wineryA < wineryB) return -1; 
-                if (wineryA > wineryB) return 1; 
-                const wineA = String(rowA.wine_name || '').trim().toLowerCase(); 
-                const wineB = String(rowB.wine_name || '').trim().toLowerCase(); 
-                if (wineA < wineB) return -1; 
-                if (wineA > wineB) return 1; 
-                return 0; 
-            }); 
-        } 
+    if (error) {
+      console.error("Supabase Error Details:", error);
+      throw new Error(`[${error.code || 'API Error'}] ${error.message}`);
+    }
 
-        console.log("Data successfully retrieved:", data); 
-        inventoryData = data; 
-        renderTable(inventoryData); 
-    } catch (error) { 
-        console.error("Critical Failure inside loadInventory:", error); 
-        tableBody.innerHTML = `<tr><td colspan="9" style="color:red; font-weight:bold; padding: 20px; background: #fff1f1;">⚠️ Connection Failed:<br><small>${error.message}</small></td></tr>`; 
-    } 
-} 
+    // Explicitly verify data structure and clear old cache arrays locally
+    if (data && data.length > 0) {
+      inventoryData = [...data]; // Force a fresh array clone to overwrite local browser states
+      
+      // Sort data locally by Winery Name, then Wine Name
+      inventoryData.sort((rowA, rowB) => {
+        const wineryA = String(rowA.winery || '').trim().toLowerCase();
+        const wineryB = String(rowB.winery || '').trim().toLowerCase();
+        if (wineryA < wineryB) return -1;
+        if (wineryA > wineryB) return 1;
+
+        const wineA = String(rowA.wine_name || '').trim().toLowerCase();
+        const wineB = String(rowB.wine_name || '').trim().toLowerCase();
+        if (wineA < wineB) return -1;
+        if (wineA > wineB) return 1;
+        return 0;
+      });
+    } else {
+      inventoryData = [];
+    }
+
+    console.log("Data successfully retrieved:", inventoryData);
+    renderTable(inventoryData);
+  } catch (error) {
+    console.error("Critical Failure inside loadInventory:", error);
+    tableBody.innerHTML = `<tr><td colspan="9" style="color:red; font-weight:bold; padding: 20px; background: #fff1f1;">⚠️ Connection Failed:<br><small>${error.message}</small></td></tr>`;
+  }
+}
+
 
 function renderTable(rows) { 
     tableBody.innerHTML = ''; 
