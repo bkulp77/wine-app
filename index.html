@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wine Inventory</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>My Wine Inventory </h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Wine Inventory</a></li>
+                <li><a href="washington-wines/index.html">Washington State Wines</a></li>
+                <li><a href="texas-wines/index.html">Texas Wines</a></li>
+                <li><a href="california-wines/index.html">California Wines</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <h1>My Wine Inventory</h1>
+        
+        <div class="notice-banner">
+            <strong>Live Sync Active:</strong> Changes made here or via your iPhone update instantly across all screens.
+        </div>
+<!-- Elegant Input Form Section -->
+<div id="add-wine-form" style="background: #fdfdfd; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+  <h3 style="margin-top: 0; color: #722f37; border-bottom: 2px solid #722f37; padding-bottom: 5px;">Add New Wine to Inventory</h3>
+  
+  <form id="wine-data-entry" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+    <div>
+      <label style="display:block; font-weight:bold; margin-bottom:5px;">Winery Name:</label>
+      <input type="text" id="form-winery" required style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+    </div>
+    <div>
+      <label style="display:block; font-weight:bold; margin-bottom:5px;">Wine Name / Blend:</label>
+      <input type="text" id="form-name" required style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+    </div>
+    <div>
+      <label style="display:block; font-weight:bold; margin-bottom:5px;">State/Region:</label>
+      <input type="text" id="form-state" placeholder="e.g. WA, TX, CA" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+    </div>
+    <div>
+      <label style="display:block; font-weight:bold; margin-bottom:5px;">Vintage:</label>
+      <input type="text" id="form-vintage" placeholder="e.g. 2024, N/V" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+    </div>
+    <div>
+      <label style="display:block; font-weight:bold; margin-bottom:5px;">Wine Type:</label>
+      <select id="form-type" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; background:white;">
+        <option value="Red">Red</option>
+        <option value="White">White</option>
+        <option value="Rose">Rose</option>
+        <option value="Sparkling">Sparkling</option>
+      </select>
+    </div>
+    <div>
+      <label style="display:block; font-weight:bold; margin-bottom:5px;">Initial Quantity:</label>
+      <input type="number" id="form-qty" value="1" min="0" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+    </div>
+    <div>
+      <label style="display:block; font-weight:bold; margin-bottom:5px;">Bin Location:</label>
+      <input type="text" id="form-bin" placeholder="e.g. A2, B14" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+    </div>
+    <div>
+  <label style="display:block; font-weight:bold; margin-bottom:5px;">Wine Label Photo:</label>
+  <input type="file" id="form-image" accept="image/*" style="width:100%; padding:5px; border:1px solid #ccc; border-radius:4px; font-size:12px; background:white;">
+  <small style="color:#777; display:block; margin-top:2px;">Supports camera snap or photo roll upload</small>
+</div>
+
+    <div style="grid-column: 1 / -1; text-align: right; margin-top: 10px;">
+      <button type="submit" style="background: #722f37; color: white; border: none; padding: 10px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: 0.2s;">
+        Save Wine to Shared Inventory
+      </button>
+    </div>
+  </form>
+</div>
+        <!-- Text search filtering engine hook -->
+        <div class="controls">
+            <input type="text" id="search-box" placeholder="search by winery, grape type, location...">
+        </div>
+
+
+        <!-- Inventory Display Table -->
+        <table id="inventory-table">
+            <thead>
+                <tr>
+                    <th>Bottle</th>
+                    <th>Winery</th>
+                    <th>State</th>
+                    <th>Wine Name</th>
+                    <th>Vintage</th>
+                    <th>Type</th>
+                    <th>Quantity</th>
+                    <th>Bin Location</th>
+                    <th>Website</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <tr><td colspan="9">loading cloud database...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Wine Locations</h2>
+    
+    <h3>Wine Shelf</h3>
+    <div class="image-container">
+        <img src="images/wine-shelf.jpg" class="project-image" alt="Wine Shelf">
+    </div>
+
+    <h3>Wine Rack</h3>
+    <div class="image-container">
+        <img src="images/wine-rack.jpg" class="project-image" alt="Wine Rack">
+    </div>
+
+    <h3>Wine Fridge</h3>
+    <div class="image-container">
+        <img src="images/wine-fridge.jpg" class="project-image" alt="Wine Fridge">
+    </div>
+
+    <!-- Links the query logic cleanly and safely -->
+    <script src="app.js"></script>
+</body>
+</html>
