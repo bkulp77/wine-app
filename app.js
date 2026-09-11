@@ -114,11 +114,16 @@ function renderTable(rows) {
 tr.querySelector('.btn-minus').addEventListener('click', async () => {
   if (quantity > 0) {
     quantity--;
-    // PASS ONLY THE VALUE TO UPDATE, THE ID STAYS SEPARATE TO PASS SAFELY
+    
+    // Explicitly send the current row properties alongside the ID target
     const { error } = await supabase
       .from('inventory.csv')
-      .update({ id: id, quantity: quantity }); 
-      
+      .update({ 
+        id: id, 
+        quantity: quantity,
+        type: row.type // Keeps type synced with whatever is currently stored on the object
+      });
+
     if (!error) {
       row.quantity = quantity;
       qtyValEl.textContent = quantity;
@@ -131,10 +136,16 @@ tr.querySelector('.btn-minus').addEventListener('click', async () => {
 
 tr.querySelector('.btn-plus').addEventListener('click', async () => {
   quantity++;
+  
+  // Explicitly send the current row properties alongside the ID target
   const { error } = await supabase
     .from('inventory.csv')
-    .update({ id: id, quantity: quantity });
-    
+    .update({ 
+      id: id, 
+      quantity: quantity,
+      type: row.type // Keeps type synced with whatever is currently stored on the object
+    });
+
   if (!error) {
     row.quantity = quantity;
     qtyValEl.textContent = quantity;
@@ -143,7 +154,6 @@ tr.querySelector('.btn-plus').addEventListener('click', async () => {
     alert("Failed to update: " + error.message);
   }
 });
-
 
             tableBody.appendChild(tr); 
         } catch (rowError) { 
