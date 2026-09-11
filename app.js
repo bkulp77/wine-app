@@ -18,7 +18,11 @@ let inventoryData = [];
 async function loadInventory() { 
     try { 
         console.log("Attempting secure connection to Supabase..."); 
-        const { data, error } = await supabase.from('inventory.csv').select('*'); 
+        const { data, error } = await supabase
+  .from('inventory.csv')
+  .select('*', { 
+    headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' } 
+  });
         if (error) { 
             console.error("Supabase Error Details:", error); 
             throw new Error(`[${error.code || 'API Error'}] ${error.message}`); 
@@ -98,35 +102,40 @@ function renderTable(rows) {
             const qtyValEl = tr.querySelector('.qty-val'); 
             const lowStockEl = tr.querySelector('.low-stock'); 
 
-            tr.querySelector('.btn-minus').addEventListener('click', async () => { 
-                if (quantity > 0) { 
-                    quantity--; 
-                    const { error } = await supabase 
-                        .from('inventory.csv') 
-                        .update({ id: id, quantity: quantity }); 
-                    if (!error) { 
-                        row.quantity = quantity; 
-                        qtyValEl.textContent = quantity; 
-                        lowStockEl.style.display = quantity <= 1 ? 'inline' : 'none'; 
-                    } else { 
-                        alert("Failed to update: " + error.message); 
-                    } 
-                } 
-            }); 
+           // Corrected button event listeners
+tr.querySelector('.btn-minus').addEventListener('click', async () => {
+  if (quantity > 0) {
+    quantity--;
+    // PASS ONLY THE VALUE TO UPDATE, THE ID STAYS SEPARATE TO PASS SAFELY
+    const { error } = await supabase
+      .from('inventory.csv')
+      .update({ id: id, quantity: quantity }); 
+      
+    if (!error) {
+      row.quantity = quantity;
+      qtyValEl.textContent = quantity;
+      lowStockEl.style.display = quantity <= 1 ? 'inline' : 'none';
+    } else {
+      alert("Failed to update: " + error.message);
+    }
+  }
+});
 
-            tr.querySelector('.btn-plus').addEventListener('click', async () => { 
-                quantity++; 
-                const { error } = await supabase 
-                    .from('inventory.csv') 
-                    .update({ id: id, quantity: quantity }); 
-                if (!error) { 
-                    row.quantity = quantity; 
-                    qtyValEl.textContent = quantity; 
-                    lowStockEl.style.display = quantity <= 1 ? 'inline' : 'none'; 
-                } else { 
-                    alert("Failed to update: " + error.message); 
-                } 
-            }); 
+tr.querySelector('.btn-plus').addEventListener('click', async () => {
+  quantity++;
+  const { error } = await supabase
+    .from('inventory.csv')
+    .update({ id: id, quantity: quantity });
+    
+  if (!error) {
+    row.quantity = quantity;
+    qtyValEl.textContent = quantity;
+    lowStockEl.style.display = quantity <= 1 ? 'inline' : 'none';
+  } else {
+    alert("Failed to update: " + error.message);
+  }
+});
+
 
             tableBody.appendChild(tr); 
         } catch (rowError) { 
