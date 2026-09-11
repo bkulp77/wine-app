@@ -155,8 +155,20 @@ searchBox.addEventListener('input', function(e) {
   renderTable(filteredRows);
 });
 
-// Run layout initialization
+// 1. Run the initial data load right when the app boots up
 loadInventory();
+
+// 2. Set an automatic background timer to fetch fresh data every 5 seconds.
+// This forces your app to silently check Supabase and instantly update your 
+// screen layout with new counts, types, or hidden 0-quantity rows automatically!
+setInterval(() => {
+  // Only auto-refresh if you aren't actively searching or typing in the search box
+  const searchInput = document.getElementById('search-box');
+  if (!searchInput || searchInput.value === '') {
+    console.log("Auto-refreshing inventory from Supabase...");
+    loadInventory();
+  }
+}, 5000); // 5000 milliseconds = 5 seconds
 // Database Entry Submission Handler (Updated with Image Base64 Upload Engine)
 document.getElementById('wine-data-entry').addEventListener('submit', async function(e) {
   e.preventDefault(); // Stop page from hard reloading
